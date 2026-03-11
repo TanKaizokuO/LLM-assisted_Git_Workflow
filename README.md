@@ -1,6 +1,6 @@
 # ai-git
 
-A Python CLI tool that automatically commits and pushes code to GitHub while generating intelligent commit messages using an LLM. 
+A smart Python CLI tool that automatically commits and pushes code to GitHub while generating intelligent commit messages using an LLM. 
 
 ## Features
 - **Git Diff Analysis**: Automatically captures code changes based on staged/unstaged changes.
