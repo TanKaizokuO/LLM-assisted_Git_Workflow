@@ -83,7 +83,7 @@ def handle_commit():
         print("Commit created successfully (auto_push is disabled). 🎉")
 
 def main():
-    parser = argparse.ArgumentParser(description="AI Git CLI tool: Automatically generate intelligent commit messages")
+    parser = argparse.ArgumentParser(description="DiffSense CLI tool: Automatically generate intelligent commit messages")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     
     # Setting up the 'commit' command

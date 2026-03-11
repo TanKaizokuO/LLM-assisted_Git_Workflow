@@ -11,12 +11,12 @@ DEFAULT_CONFIG = {
 }
 
 def load_config():
-    # Load .env file from current directory or .aigit directory if present
+    # Load .env file from current directory or .diffsense directory if present
     load_dotenv(Path.cwd() / ".env")
-    load_dotenv(Path.cwd() / ".aigit" / ".env")
+    load_dotenv(Path.cwd() / ".diffsense" / ".env")
     
-    # Look for .aigit/config.yaml in the current directory
-    config_path = Path.cwd() / ".aigit" / "config.yaml"
+    # Look for .diffsense/config.yaml in the current directory
+    config_path = Path.cwd() / ".diffsense" / "config.yaml"
     if not config_path.exists():
         return DEFAULT_CONFIG
     

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='ai-git',
+    name='diffsense',
     version='0.1.0',
     description='A CLI tool that uses an LLM to automatically generate semantic Git commits.',
     author='AI Assistant',
@@ -17,7 +17,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'ai-git=main:main',
+            'diffsense=main:main',
         ],
     },
 )
