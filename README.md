@@ -3,7 +3,7 @@
 A smart Python CLI tool that automatically commits and pushes code to GitHub while generating intelligent commit messages using an LLM. 
 
 ## Features
-- **Git Diff Analysis**: Automatically captures code changes based on staged/unstaged changes.
+- **Git Diff Analysis**: Automatically captures code changes based on staged or runstaged changes.
 - **LLM Generated Commits**: Integrates with OpenAI models (default: `gpt-4o-mini`) to write semantic commit messages.
 - **Conventional Commits Format**: Follows `<type>(<scope>): <summary>`.
 - **Automatic Git Workflow**: Stages, generates the commit message, commits, and optionally pushes automatically.
