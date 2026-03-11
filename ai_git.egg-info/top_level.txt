@@ -1,7 +1,0 @@
-cli
-commit_classifier
-config
-diff_parser
-git_utils
-llm_commit_generator
-main
