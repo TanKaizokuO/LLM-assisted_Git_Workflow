@@ -2,7 +2,7 @@
 
 **DiffSense** is a developer productivity CLI tool that totally automates the mundane task of writing git commits. By utilizing powerful Large Language Models (LLMs)—including OpenAI and NVIDIA AI endpoints—it analyzes your local `git diff`, understands the exact code changes you made, and produces extremely high-quality, semantic commit messages complying with the Conventional Commits specification. 
 
-Beyond just generating messages, `DiffSense` acts as a full-fledged git automation daemon. It can stage your files, generate the perfect message, commit locally, and instantly push to your remote repository. You can either use it on-demand whenever you are ready to wrap up a feature, or run it in the background as a daemon to implicitly save your work every 2 minutes without ever opening a terminal tab.
+Beyond just generating messages, `DiffSense` acts as a full-fledged git automation daemon. It can stage your files, generate the perfect message, commit locally, and instantly push to your remote repository. You can either use it on-demand whenever you are ready to wrap up a feature, or run it in the background as a daemon to implicitly save your work every 1 minute without ever opening a terminal tab.
 
 ## Quick Start
 
@@ -33,14 +33,14 @@ Follow these steps to get `DiffSense` running and automating your commits in no 
    ```
 
 4. **Run as an Auto-Tracker Daemon (Optional)**
-   If you want `DiffSense` to seamlessly track your work in the background without any manual intervention, start the auto daemon. It will commit and push your changes every 2 minutes.
+   If you want `DiffSense` to seamlessly track your work in the background without any manual intervention, start the auto daemon. It will commit and push your changes every 1 minute.
    ```bash
    diffsense auto
    ```
 
 ## Features
 - **Git Diff Analysis**: Automatically captures code changes based on staged or unstaged changes.
-- **Auto-Commit Daemon**: Includes an `auto` command to safely track, commit, and push your work unconditionally every 2 minutes.
+- **Auto-Commit Daemon**: Includes an `auto` command to safely track, commit, and push your work unconditionally every 1 minute.
 - **LLM Generated Commits**: Integrates with OpenAI models and NVIDIA (`meta/llama-3.1-8b-instruct`) models.
 - **Conventional Commits Format**: Follows `<type>(<scope>): <summary>`.
 - **Automatic Git Workflow**: Stages, generates the commit message, commits, and optionally pushes automatically.

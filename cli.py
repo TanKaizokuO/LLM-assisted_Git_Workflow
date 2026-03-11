@@ -88,7 +88,7 @@ def main():
     
     # Setting up the 'commit' command
     commit_parser = subparsers.add_parser("commit", help="Analyze diff, generate commit message, commit and push")
-    auto_parser = subparsers.add_parser("auto", help="Run as a daemon that commits and pushes automatically every 2 minutes")
+    auto_parser = subparsers.add_parser("auto", help="Run as a daemon that commits and pushes automatically every 1 minute")
     
     args = parser.parse_args()
     
@@ -96,7 +96,7 @@ def main():
         handle_commit()
     elif args.command == "auto":
         import time
-        print("Starting Auto-Commit Daemon (every 2 minutes)...")
+        print("Starting Auto-Commit Daemon (every 1 minute)...")
         while True:
             try:
                 # Force unattended on for auto mode
@@ -123,12 +123,12 @@ def main():
                 else:
                     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] No changes detected.")
                     
-                time.sleep(120) # 2 minutes
+                time.sleep(60) # 1 minute
             except KeyboardInterrupt:
                 print("\nAuto-Commit Daemon stopped by user.")
                 break
             except Exception as e:
                 print(f"Error in daemon: {e}")
-                time.sleep(120)
+                time.sleep(60)
     else:
         parser.print_help()
