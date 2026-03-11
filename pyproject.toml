@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-git"
+version = "0.1.0"
+description = "A CLI tool that uses an LLM to automatically generate semantic Git commits."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0.0",
+    "PyYAML>=6.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+ai-git = "cli:main"
+
+[tool.setuptools]
+py-modules = [
+    "main",
+    "cli",
+    "config",
+    "git_utils",
+    "diff_parser",
+    "llm_commit_generator",
+    "commit_classifier",
+]
