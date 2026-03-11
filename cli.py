@@ -61,8 +61,14 @@ def handle_commit():
     print("Analyzing code changes and talking to LLM...")
     commit_message = generate_commit_message(parsed_diff, config)
     
-    # Ask for user confirmation
-    final_message = ask_confirmation(commit_message)
+    unattended = config.get("unattended", False)
+    
+    # Ask for user confirmation if not unattended
+    if unattended:
+        print(f"\nGenerated Commit Message (Unattended Mode):\n{'-'*50}\n{commit_message}\n{'-'*50}")
+        final_message = commit_message
+    else:
+        final_message = ask_confirmation(commit_message)
     
     # Commit
     print(f"Committing changes...")
@@ -82,10 +88,47 @@ def main():
     
     # Setting up the 'commit' command
     commit_parser = subparsers.add_parser("commit", help="Analyze diff, generate commit message, commit and push")
+    auto_parser = subparsers.add_parser("auto", help="Run as a daemon that commits and pushes automatically every 2 minutes")
     
     args = parser.parse_args()
     
     if args.command == "commit":
         handle_commit()
+    elif args.command == "auto":
+        import time
+        print("Starting Auto-Commit Daemon (every 2 minutes)...")
+        while True:
+            try:
+                # Force unattended on for auto mode
+                config = load_config()
+                config["unattended"] = True
+                
+                # A modified inline run
+                if not has_git_repo():
+                    print("Error: Not inside a git repository.")
+                    sys.exit(1)
+                    
+                diff = get_unstaged_diff()
+                if diff:
+                    print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] Detected changes. Triggering commit...")
+                    git_add_all()
+                    diff = get_staged_diff()
+                    parsed_diff = parse_diff(diff, max_lines=config.get("max_diff_lines", 2000))
+                    commit_message = generate_commit_message(parsed_diff, config)
+                    print(f"Generated Commit Message:\n{commit_message}")
+                    git_commit(commit_message)
+                    if config.get("auto_push", True):
+                        git_push()
+                        print("Pushed successfully!")
+                else:
+                    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] No changes detected.")
+                    
+                time.sleep(120) # 2 minutes
+            except KeyboardInterrupt:
+                print("\nAuto-Commit Daemon stopped by user.")
+                break
+            except Exception as e:
+                print(f"Error in daemon: {e}")
+                time.sleep(120)
     else:
         parser.print_help()
