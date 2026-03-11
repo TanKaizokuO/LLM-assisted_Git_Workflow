@@ -15,7 +15,7 @@ Beyond just generating messages, `ai-git` acts as a full-fledged git automation 
    ```bash
    uv run ai-git commit
    ```
-3. Or run it as a background daemon to auto-commit and push every 2 minutes:
+3. Or run it as a background daemon to auto-commit and push every 1 minutes:
    ```bash
    uv run ai-git auto
    ```

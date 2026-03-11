@@ -1,0 +1,46 @@
+AI-GitCLI: Technical Architecture & Working Details
+===================================================
+
+Overview
+--------
+The `ai-git` CLI tool is a developer utility designed to fully automate the process of authoring semantic git commit messages and pushing those changes to remote repositories. It is built in Python, heavily relying on the `subprocess` module for Git interactions and the `openai` Python client for interacting with Large Language Models (LLMs) (supporting both OpenAI and NVIDIA endpoints).
+
+Component Breakdown
+-------------------
+
+1. Configuration & Secrets Management (`config.py`)
+   - Merges application defaults with project-level overrides defined in `.aigit/config.yaml`.
+   - Utilizes `python-dotenv` (`load_dotenv`) to aggressively read `.env` and `.aigit/.env` files safely tracking and injecting api keys into the environment variables without hardcoding them in the repository.
+   - Core configuration fields include:
+     - `llm_provider`: Decides the logic branch to take when instantiating the API client ("openai" or "nvidia").
+     - `model`: Adjusts the specific LLM model (e.g., "meta/llama-3.1-8b-instruct" for NVIDIA, "gpt-4o-mini" for OpenAI).
+     - `max_diff_lines`: Prevents very large diffs from blowing out the context window.
+     - `auto_push`: Flag for determining if a `git push` command follows a successful commit.
+
+2. CLI & Execution Routing (`cli.py`, `main.py`)
+   - Uses `argparse` to establish an extensible command line interface currently supporting two primary actions:
+     a) `commit`: On-demand interactive commit process.
+     b) `auto`: Unattended background daemon mode.
+   - Validates that the current working directory resides within a valid git repository workspace using the `git rev-parse --is-inside-work-tree` command.
+
+3. Git Context Capture (`git_utils.py`)
+   - Abstracts local system calls to run standard git commands (`git add`, `git commit`, `git push`).
+   - Intelligence Check: Checks `git diff --cached` (staged files). If empty, checks `git diff` (unstaged files). If unstaged files are found, it proactively initiates `git add .` to unify the diff before processing.
+
+4. Diff Parsing Engine (`diff_parser.py`)
+   - Operates on the raw text output from the git diff commands.
+   - If the code changes span more lines than `max_diff_lines` (default 2000), it artificially truncates the git diff payload appending a notice. This ensures we safely skirt token-limit issues on endpoints while mostly retaining context for the LLM.
+
+5. System Prompt & Knowledge Base (`commit_classifier.py`)
+   - Provides a highly restrictive, persona-based system prompt bound to the rules of the Conventional Commits specification.
+   - Instructs the LLM to analyze the diff and categorize its intent accurately into mapping formats: `feat`, `fix`, `refactor`, `docs`, `test`, or `chore`. Emphasizes brevity (under 72 chars summary, imperative mood).
+
+6. LLM Integration Layer (`llm_commit_generator.py`)
+   - Marshals the requests. If the `nvidia` provider is chosen in the `config.yaml`, it dynamically overrides the `base_url` parameter in the OpenAI client to `https://integrate.api.nvidia.com/v1`, permitting users to use NVAPI without adopting completely separate networking libraries.
+   - The temperature parameter is lowered (e.g., `0.2`) during the chat completion call to enforce determinism and reliability in producing strict Conventional Commits structure rather than creative storytelling.
+
+7. Auto-Commit Daemon Loop (`cli.py` -> `auto` command)
+   - When run via `uv run ai-git auto`, the script intercepts the thread and places it into an infinite `while True:` loop.
+   - Temporarily overrides the `unattended` flag to `True`.
+   - The daemon sleeps for 120 seconds (`time.sleep(120)`).
+   - Upon awakening, it probes git for changes. If changes exist, it builds the message via the LLM pipeline, commits, and pushes immediately without requiring terminal stdin input from the user. It elegantly catches keyboard interruptions to spin down.
