@@ -5,19 +5,37 @@
 Beyond just generating messages, `ai-git` acts as a full-fledged git automation daemon. It can stage your files, generate the perfect message, commit locally, and instantly push to your remote repository. You can either use it on-demand whenever you are ready to wrap up a feature, or run it in the background as a daemon to implicitly save your work every 2 minutes without ever opening a terminal tab.
 
 ## Quick Start
-1. Provide your API key in a `.env` file at the root of your project:
+
+Follow these steps to get `ai-git` running and automating your commits in no time.
+
+1. **Install the CLI Tool**
+   Install the package locally so the `ai-git` command becomes available in your terminal. You should ideally do this within a virtual environment.
+   ```bash
+   # From the root of the ai-git repository
+   pip install -e .
+   ```
+
+2. **Configure your API Key**
+   The tool needs access to an LLM provider to generate commit messages. Create a `.env` file at the root of the project you want to manage with `ai-git`, and add your API key:
    ```env
-   OPENAI_API_KEY="your-api-key"
-   # OR
+   # Use OpenAI's models (default)
+   OPENAI_API_KEY="your-openai-api-key"
+   
+   # OR use NVIDIA's models
    NVIDIA_API_KEY="your-nvapi-key"
    ```
-2. Run the tool to commit changes:
+   *(Alternatively, you can export these as environment variables in your terminal).*
+
+3. **Generate a Commit**
+   Stage your changes (or let `ai-git` detect unstaged changes) and run the commit command. It will analyze your diff, propose a commit message, and ask for confirmation before committing and pushing.
    ```bash
-   uv run ai-git commit
+   ai-git commit
    ```
-3. Or run it as a background daemon to auto-commit and push every 1 minutes:
+
+4. **Run as an Auto-Tracker Daemon (Optional)**
+   If you want `ai-git` to seamlessly track your work in the background without any manual intervention, start the auto daemon. It will commit and push your changes every 2 minutes.
    ```bash
-   uv run ai-git auto
+   ai-git auto
    ```
 
 ## Features
