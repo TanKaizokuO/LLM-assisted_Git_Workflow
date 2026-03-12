@@ -6,7 +6,7 @@ Beyond just generating messages, `DiffSense` acts as a full-fledged git automati
 
 ## Quick Start
 
-Follow these steps to get `DiffSense` running and automating your commits.
+Follow these steps to get `DiffSense` running and automating your commits in no time.
 
 1. **Install the CLI Tool**
    Install the package locally so the `diffsense` command becomes available in your terminal. You should ideally do this within a virtual environment.
