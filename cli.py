@@ -96,7 +96,18 @@ def main():
         handle_commit()
     elif args.command == "auto":
         import time
-        print("Starting Auto-Commit Daemon (every 1 minute)...")
+        import sys
+        
+        interval_input = input("Time between each commit (in minutes, default 1): ").strip()
+        try:
+            interval_minutes = float(interval_input) if interval_input else 1.0
+        except ValueError:
+            print("Invalid input for time. Defaulting to 1 minute.")
+            interval_minutes = 1.0
+            
+        interval_seconds = int(interval_minutes * 60)
+        
+        print(f"Starting Auto-Commit Daemon (every {interval_minutes} minute(s))...")
         while True:
             try:
                 # Force unattended on for auto mode
@@ -121,14 +132,22 @@ def main():
                         git_push()
                         print("Pushed successfully!")
                 else:
-                    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] No changes detected.")
+                    print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] No changes detected.")
                     
-                time.sleep(60) # 1 minute
+                for remaining in range(interval_seconds, 0, -1):
+                    sys.stdout.write(f"\rTime remaining till next commit: {remaining} seconds... ")
+                    sys.stdout.flush()
+                    time.sleep(1)
+                    
+                # Clear the line
+                sys.stdout.write("\r" + " " * 60 + "\r")
+                sys.stdout.flush()
+                
             except KeyboardInterrupt:
                 print("\nAuto-Commit Daemon stopped by user.")
                 break
             except Exception as e:
                 print(f"Error in daemon: {e}")
-                time.sleep(60)
+                time.sleep(10)
     else:
         parser.print_help()
