@@ -24,6 +24,15 @@ def get_staged_diff():
 def get_unstaged_diff():
     return run_command(["git", "diff"])
 
+def has_untracked_files():
+    """Return True if there are any untracked (new) files not yet staged."""
+    output = run_command(["git", "ls-files", "--others", "--exclude-standard"])
+    return bool(output.strip())
+
+def has_changes():
+    """Return True if there are any unstaged tracked changes OR untracked new files."""
+    return bool(get_unstaged_diff()) or has_untracked_files()
+
 def git_add_all():
     run_command(["git", "add", "."])
 

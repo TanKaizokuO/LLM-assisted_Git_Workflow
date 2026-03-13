@@ -101,3 +101,15 @@ The tool will display a proposed commit message and ask for confirmation before 
 - `y` to accept and commit.
 - `n` to reject and abort.
 - `e` to edit the generated message before committing.
+
+## Troubleshooting
+
+### "command not found: pip" during Installation
+If you encounter `zsh: command not found: pip` or `pip3` while trying to install `DiffSense`, you can use **`uv`** (a fast Python package manager) instead.
+
+If you have `uv` installed, run:
+```bash
+uv tool install .
+```
+This safely installs the tool globally on your system.
+Verify the installation by running `diffsense --help`.

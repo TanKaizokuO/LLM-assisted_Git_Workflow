@@ -6,10 +6,6 @@ setup(
     description='A CLI tool that uses an LLM to automatically generate semantic Git commits.',
     author='AI Assistant',
     packages=find_packages(),
-    py_modules=[
-        'main', 'cli', 'config', 'git_utils', 'diff_parser', 
-        'llm_commit_generator', 'commit_classifier'
-    ],
     install_requires=[
         'openai>=1.0.0',
         'PyYAML>=6.0',
@@ -17,7 +13,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'diffsense=main:main',
+            'diffsense=diffsense.cli:main',
         ],
     },
 )

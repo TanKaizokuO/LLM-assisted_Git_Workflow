@@ -15,15 +15,4 @@ dependencies = [
 ]
 
 [project.scripts]
-diffsense = "cli:main"
-
-[tool.setuptools]
-py-modules = [
-    "main",
-    "cli",
-    "config",
-    "git_utils",
-    "diff_parser",
-    "llm_commit_generator",
-    "commit_classifier",
-]
+diffsense = "diffsense.cli:main"

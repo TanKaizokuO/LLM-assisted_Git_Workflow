@@ -4,16 +4,16 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 DEFAULT_CONFIG = {
-    "llm_provider": "openai",
-    "model": "gpt-4o-mini",
+    "model": "meta/llama-3.1-8b-instruct",
     "max_diff_lines": 2000,
     "auto_push": True
 }
 
 def load_config():
     # Load .env file from current directory or .diffsense directory if present
-    load_dotenv(Path.cwd() / ".env")
-    load_dotenv(Path.cwd() / ".diffsense" / ".env")
+    # We must pass override=True to ensure it forces the current directory's env vars into os.environ
+    load_dotenv(Path.cwd() / ".env", override=True)
+    load_dotenv(Path.cwd() / ".diffsense" / ".env", override=True)
     
     # Look for .diffsense/config.yaml in the current directory
     config_path = Path.cwd() / ".diffsense" / "config.yaml"

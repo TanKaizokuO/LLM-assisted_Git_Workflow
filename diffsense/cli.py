@@ -1,9 +1,9 @@
 import argparse
 import sys
-from config import load_config
-from git_utils import has_git_repo, get_staged_diff, get_unstaged_diff, git_add_all, git_commit, git_push
-from diff_parser import parse_diff
-from llm_commit_generator import generate_commit_message
+from diffsense.config import load_config
+from diffsense.git_utils import has_git_repo, get_staged_diff, get_unstaged_diff, has_changes, git_add_all, git_commit, git_push
+from diffsense.diff_parser import parse_diff
+from diffsense.llm_commit_generator import generate_commit_message
 
 def ask_confirmation(message):
     print("\nGenerated Commit Message:")
@@ -53,6 +53,12 @@ def handle_commit():
         git_add_all()
         # Retrieve the updated diff from staged changes
         diff = get_staged_diff()
+
+        # Fix 4: guard — if diff is still empty after staging (e.g. only
+        # .gitignored files were present), bail out cleanly.
+        if not diff:
+            print("No stageable changes found (all files may be .gitignored).")
+            sys.exit(0)
         
     # Process diff
     parsed_diff = parse_diff(diff, max_lines=config.get("max_diff_lines", 2000))
@@ -119,11 +125,14 @@ def main():
                     print("Error: Not inside a git repository.")
                     sys.exit(1)
                     
-                diff = get_unstaged_diff()
-                if diff:
+                # Fix 3: use has_changes() to also detect untracked new files
+                if has_changes():
                     print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] Detected changes. Triggering commit...")
                     git_add_all()
                     diff = get_staged_diff()
+                    if not diff:
+                        print("No stageable changes found (all files may be .gitignored). Skipping.")
+                        continue
                     parsed_diff = parse_diff(diff, max_lines=config.get("max_diff_lines", 2000))
                     commit_message = generate_commit_message(parsed_diff, config)
                     print(f"Generated Commit Message:\n{commit_message}")
