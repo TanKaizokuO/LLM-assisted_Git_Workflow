@@ -1,115 +1,154 @@
-# DiffSense
+# 🔍 DiffSense
 
-**DiffSense** is a developer productivity CLI tool that totally automates the mundane task of writing git commits. By utilizing powerful Large Language Models (LLMs)—including OpenAI and NVIDIA AI endpoints—it analyzes your local `git diff`, understands the exact code changes you made, and produces extremely high-quality, semantic commit messages complying with the Conventional Commits specification.
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196.svg)](https://conventionalcommits.org)
 
-Beyond just generating messages, `DiffSense` acts as a full-fledged git automation daemon. It can stage your files, generate the perfect message, commit locally, and instantly push to your remote repository. You can either use it on-demand whenever you are ready to wrap up a feature, or run it in the background as a daemon to implicitly save your work every 1 minute without ever opening a terminal tab.
+**DiffSense** is a developer productivity CLI tool that automates writing git commits using AI. By analyzing your local `git diff`, it understands code changes and generates semantic commit messages complying with the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
-## Quick Start
+Powered by NVIDIA NIM API endpoints (running high-performance models like `meta/llama-3.1-8b-instruct`), DiffSense acts as your AI-powered git automation companion. Run it interactively or as a background auto-commit daemon to back up your changes.
 
-Follow these steps to get `DiffSense` running and automating your commits in no time.
+---
 
-1. **Install the CLI Tool**
-   Install the package locally so the `diffsense` command becomes available in your terminal. You should ideally do this within a virtual environment.
+## 🛠️ Features
 
-   ```bash
-   # From the root of the DiffSense repository
-   pip install -e .
-   ```
+*   **Smart Git Diff Analysis**: Captures staged changes. If none are staged, automatically stages unstaged changes before analysis.
+*   **Hunk-Aware Diff Parsing**: Intelligently truncates large diffs up to your configured limit without cutting in the middle of diff hunk headers (`@@`).
+*   **Conventional Commit Formatting**: Strict adherence to `<type>(<scope>): <summary>` format (e.g., `feat(auth): add login validation`).
+*   **Interactive Mode**: Review proposed messages, accept, abort, or manually edit them inline.
+*   **Auto-Commit Daemon**: An unattended background loop (`diffsense auto`) that periodically stages, generates commit messages, and pushes changes without requiring stdin.
+*   **NVIDIA NIM API Integration**: Pre-configured to use fast LLM endpoints powered by NVIDIA APIs.
 
-2. **Configure your API Key**
-   The tool needs access to an LLM provider to generate commit messages. Create a `.env` file at the root of the project you want to manage with `DiffSense`, and add your API key:
+---
 
-   ```env
-   # Use OpenAI's models (default)
-   OPENAI_API_KEY="your-openai-api-key"
+## 🏗️ Architecture Workflow
 
-   # OR use NVIDIA's models
-   NVIDIA_API_KEY="your-nvapi-key"
-   ```
+The diagram below illustrates how DiffSense processes your git changes:
 
-   _(Alternatively, you can export these as environment variables in your terminal)._
+```mermaid
+graph TD
+    A[Start CLI] --> B{Check Command}
+    B -->|commit| C[Get Git Diff]
+    B -->|auto| D[Start Daemon Loop]
+    D -->|Interval Tick| C
+    C --> E{Has Changes?}
+    E -->|No| F[Exit/Sleep]
+    E -->|Yes: Unstaged| G[Run git add .]
+    E -->|Yes: Staged| H[Truncate Diff safely]
+    G --> H
+    H --> I[Send Diff to NVIDIA NIM]
+    I --> J{Unattended/Auto Mode?}
+    J -->|No| K[Ask User Confirmation: y/n/e]
+    J -->|Yes| L[Commit Changes]
+    K -->|y/Accept| L
+    K -->|e/Edit| M[Input Custom Message]
+    M --> L
+    K -->|n/Abort| N[Exit]
+    L --> O{auto_push Enabled?}
+    O -->|Yes| P[Run git push]
+    O -->|No| Q[Finish]
+    P --> Q
+```
 
-3. **Generate a Commit**
-   Stage your changes (or let `DiffSense` detect unstaged changes) and run the commit command. It will analyze your diff, propose a commit message, and ask for confirmation before committing and pushing.
+---
 
-   ```bash
-   diffsense commit
-   ```
+## 🚀 Installation
 
-4. **Run as an Auto-Tracker Daemon (Optional)**
-   If you want `DiffSense` to seamlessly track your work in the background without any manual intervention, start the auto daemon. It will commit and push your changes every 1 minute.
-   ```bash
-   diffsense auto
-   ```
+### Prerequisites
+*   Python **3.10 or higher**
+*   Git installed and initialized in your target project directories
 
-## Features
-
-- **Git Diff Analysis**: Automatically captures code changes based on staged or unstaged changes.
-- **Auto-Commit Daemon**: Includes an `auto` command to safely track, commit, and push your work unconditionally every 1 minute.
-- **LLM Generated Commits**: Integrates with OpenAI models and NVIDIA (`meta/llama-3.1-8b-instruct`) models.
-- **Conventional Commits Format**: Follows `<type>(<scope>): <summary>`.
-- **Automatic Git Workflow**: Stages, generates the commit message, commits, and optionally pushes automatically.
-- **Configurable**: Define configurations globally or locally via `.diffsense/config.yaml`.
-
-## Installation
-
-### From Source
-
+### 1. From Source
+Clone the repository and install it in editable mode inside your virtual environment:
 ```bash
-cd diffsense
+# From the root of the repository
 pip install -e .
 ```
 
-### Install Dependencies only
-
-If you prefer not to install it globally, you can install the dependencies directly:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Setup
-
-Make sure you have an active API key exported in your terminal environment:
-
-```bash
-export OPENAI_API_KEY="your-openai-api-key"
-```
-
-## Configuration
-
-You can control settings such as `llm_provider`, `model`, `max_diff_lines`, and `auto_push` using a config format like:
-`.diffsense/config.yaml`
-
-```yaml
-llm_provider: openai
-model: gpt-4o-mini
-max_diff_lines: 2000
-auto_push: true
-```
-
-## Usage
-
-Simply make changes to your repository and run:
-
-```bash
-diffsense commit
-```
-
-The tool will display a proposed commit message and ask for confirmation before committing and pushing. You can enter:
-
-- `y` to accept and commit.
-- `n` to reject and abort.
-- `e` to edit the generated message before committing.
-
-## Troubleshooting
-
-### "command not found: pip" during Installation
-If you encounter `zsh: command not found: pip` or `pip3` while trying to install `DiffSense`, you can use **`uv`** (a fast Python package manager) instead.
-
-If you have `uv` installed, run:
+### 2. Using `uv` (Recommended)
+If you use [uv](https://github.com/astral-sh/uv) (fast Python package manager), you can install the CLI tool globally:
 ```bash
 uv tool install .
 ```
-This safely installs the tool globally on your system.
-Verify the installation by running `diffsense --help`.
+Verify the installation:
+```bash
+diffsense --help
+```
+
+---
+
+## ⚙️ Configuration & Environment
+
+### 1. API Key Setup
+DiffSense relies on the NVIDIA API client. Get your API key from NVIDIA, then export it or set it in your environment:
+```bash
+export NVIDIA_API_KEY="your-nvidia-api-key"
+```
+Alternatively, create a `.env` file at the root of your project or within a `.diffsense` folder:
+```env
+# .env or .diffsense/.env
+NVIDIA_API_KEY="your-nvidia-api-key"
+```
+
+### 2. YAML Configuration
+Customize the settings globally or locally per project by creating a `.diffsense/config.yaml` file:
+
+```yaml
+# .diffsense/config.yaml
+
+# Model identifier from NVIDIA NIM (e.g. meta/llama-3.1-8b-instruct)
+model: "meta/llama-3.1-8b-instruct"
+
+# Maximum lines of diff text to parse and send to the LLM (default: 2000)
+max_diff_lines: 2000
+
+# Push changes automatically to remote after committing (default: true)
+auto_push: true
+
+# Skip prompt confirmation if true (default: false, overridden to true in 'auto' mode)
+unattended: false
+```
+
+---
+
+## 💻 Usage
+
+### On-Demand Commits
+Stage some changes (or leave them unstaged) and run:
+```bash
+diffsense commit
+```
+If you have unstaged changes, DiffSense automatically stages them, analyzes the diff, and shows the proposed commit message:
+```text
+Generated Commit Message:
+--------------------------------------------------
+feat(cli): add interactive edit flow
+--------------------------------------------------
+
+Do you want to proceed with this commit? [Y/n/e(dit)]: 
+```
+*   Press **`Enter`** (or `y`) to accept and commit.
+*   Type **`e`** to edit the message before confirming.
+*   Type **`n`** to abort.
+
+### Background Auto-Commit Daemon
+To run DiffSense in a background tracking loop, run:
+```bash
+diffsense auto
+```
+You will be prompted to enter the interval duration:
+```text
+Time between each commit (in minutes, default 1): 2
+Starting Auto-Commit Daemon (every 2.0 minute(s))...
+```
+The daemon runs unattended: it monitors for files changing, automatically stages them, generates messages, commits, and pushes them safely. You can stop the daemon at any time using `Ctrl+C`.
+
+---
+
+## 🛠️ Troubleshooting
+
+### Command Not Found: pip
+If `pip` is missing or you get permissions errors during installation, use `python -m pip install -e .` or install via **`uv`** as described in the installation section.
+
+### Environment Variable Overrides
+Make sure that your `.env` or `.diffsense/.env` file is in the current working directory from which you are running `diffsense`.
